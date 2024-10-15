@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -69,17 +68,50 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
-        }
-	}
 }
+impl<T: Ord + Clone> LinkedList<T> {
+    pub fn merge(mut list_a: LinkedList<T>, mut list_b: LinkedList<T>) -> Self {
+        let mut merged_list = LinkedList::<T>::new();
 
+        let mut current_a = list_a.start;
+        let mut current_b = list_b.start;
+
+        while let (Some(a_ptr), Some(b_ptr)) = (current_a, current_b) {
+            unsafe {
+                let a_val = &(*a_ptr.as_ptr()).val;
+                let b_val = &(*b_ptr.as_ptr()).val;
+
+                if a_val <= b_val {
+                    merged_list.add(a_val.clone());  // Clone the value
+                    current_a = (*a_ptr.as_ptr()).next;
+                } else {
+                    merged_list.add(b_val.clone());  // Clone the value
+                    current_b = (*b_ptr.as_ptr()).next;
+                }
+            }
+        }
+
+        // Add remaining elements from list_a
+        while let Some(a_ptr) = current_a {
+            unsafe {
+                let a_val = &(*a_ptr.as_ptr()).val;
+                merged_list.add(a_val.clone());  // Clone the value
+                current_a = (*a_ptr.as_ptr()).next;
+            }
+        }
+
+        // Add remaining elements from list_b
+        while let Some(b_ptr) = current_b {
+            unsafe {
+                let b_val = &(*b_ptr.as_ptr()).val;
+                merged_list.add(b_val.clone());  // Clone the value
+                current_b = (*b_ptr.as_ptr()).next;
+            }
+        }
+
+        merged_list
+    }
+}
 impl<T> Display for LinkedList<T>
 where
     T: Display,
